@@ -8,7 +8,7 @@ CONST_G = 1
 
 # random seed set CONST_SEED to zero
 
-CONST_SEED = 0
+CONST_SEED = 1
 if CONST_SEED == 0:
     CONST_SEED = rn.randrange(0, 1000000)
 
@@ -16,7 +16,7 @@ if CONST_SEED == 0:
 rn.seed(CONST_SEED)
 
 # amount of point that are going to be created
-CONST_AMOUNTPOINTS = 70
+CONST_AMOUNTPOINTS = 100
 
 # Printing all constants that can define the outcome
 print("[Internal] Const G: " + str(CONST_G))
@@ -58,9 +58,6 @@ class point():
     def drawpoint(self, surface):
         pygame.draw.circle(surface, (0, 0, 0), [int(
             self.location[0]), int(self.location[1])], self.radius)
-
-    def removewithid(self):
-        self.id = 0
 
 
 def calculateDistance(loc1, loc2):
@@ -108,6 +105,7 @@ def returnlistid(prlist):
 
 screenSize = np.array([1080, 720])
 
+
 listofpoints = []  # list with all points objects
 
 
@@ -118,6 +116,7 @@ for i in range(CONST_AMOUNTPOINTS):
 
 pygame.init()
 display = pygame.display.set_mode((screenSize[0], screenSize[1]))
+clock = pygame.time.Clock()
 run = True
 
 print("Starting")
@@ -125,16 +124,16 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    pointsremoved = False
+
+    # clock
+    clock.tick()
+    pygame.display.set_caption(str(clock.get_fps()) + " FPS")
+
+    removedpoints = []
 
     # clear screen
 
     display.fill((255, 255, 255))
-
-    # draw point on screen
-
-    for i in listofpoints:
-        i.drawpoint(display)
 
     # calculations
 
@@ -144,16 +143,20 @@ while run:
                 calc = calculateForce(i.location, j.location, i.mass, j.mass)
                 i.applyForce(calc)
 
+    # draw point on screen
     # update points
 
     for i in listofpoints:
+        i.drawpoint(display)
         i.update()
 
     # collision dection
     for i in listofpoints:
-        if i.id != 0:
+        if i not in removedpoints:
             for j in listofpoints:
-                if i.id != j.id and i.id != 0 and j.id != 0:
+                if i.id != j.id and i not in removedpoints and j \
+                        not in removedpoints:
+
                     rad = i.radius + j.radius
                     if calculateDistance(i.location, j.location) <= rad:
                         # if colliding create new mass
@@ -171,9 +174,8 @@ while run:
                         createpoint(listofpoints, newloc,
                                     newvel, newmass, main)
 
-                        i.removewithid()
-                        j.removewithid()
-                        pointsremoved = True
+                        removedpoints.append(i)
+                        removedpoints.append(j)
 
     # update screen
 
@@ -181,12 +183,13 @@ while run:
 
     # removing collided points
     # but only if we know if points are removed for performance
-    if pointsremoved:
-        copiedlist = listofpoints.copy()
-        for i in copiedlist:
-            if i.id == 0:
-                listofpoints.remove(i)
+
+    if len(removedpoints) != 0:
+        print(len(removedpoints))
+        for i in removedpoints:
+            listofpoints.remove(i)
         print("[Debug] List " + returnlistid(listofpoints))
+
     pygame.time.wait(10)
 
 pygame.quit()
