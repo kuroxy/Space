@@ -44,7 +44,7 @@ class point():
         self.acceleration = np.array([0, 0])
         self.mass = mass
         self.id = pid
-        self.radius = int(math.sqrt(mass/math.pi))
+        self.radius = math.sqrt(mass/math.pi)
 
     def applyForce(self, force):
         force = np.divide(force, self.mass)
@@ -57,7 +57,7 @@ class point():
 
     def drawpoint(self, surface):
         pygame.draw.circle(surface, (0, 0, 0), [int(
-            self.location[0]), int(self.location[1])], self.radius)
+            self.location[0]), int(self.location[1])], int(self.radius))
 
     def removewithid(self):
         self.id = 0
@@ -175,6 +175,8 @@ while run:
                         j.removewithid()
                         pointsremoved = True
 
+                        
+ 
     # update screen
 
     pygame.display.flip()
